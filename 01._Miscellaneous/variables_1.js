@@ -33,3 +33,9 @@ people.push("Krelle");
 console.log(people);
 
 // ASI = Automatic Semicolon Insertion
+
+// How to define string in JS:
+// ""
+// ''
+// ``
+

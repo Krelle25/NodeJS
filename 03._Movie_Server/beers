@@ -1,0 +1,10 @@
+REST API Design (Movies)
+
+| HTTP Method | Endpoint    | Description                         |
+| ----------- | ----------- | ----------------------------------- |
+| POST        | /movies      | Create a new movie object            |
+| GET         | /movies      | Retrieve all movie objects           |
+| GET         | /movies/{id} | Retrieve a single movie object by ID |
+| PUT         | /movies/{id} | Update the entire movie object       |
+| PATCH       | /movies/{id} | Update part of the movie object      |
+| DELETE      | /movies/{id} | Delete a movie object                |
