@@ -232,6 +232,364 @@ This exercise helped solidify understanding of:
 
 ---
 
-## Day 1 – JavaScript Fundamentals & REST API Design
+## Day 2 - First Server (Express), Functions & NPM
 
-**Date:** January 29th
+**Date:** February 5th
+
+---
+
+## Overview
+
+Day 2 focused on moving from pure JavaScript into the backend world by creating the **first Node.js server using Express**. In addition, deeper JavaScript concepts such as scoping, functions, callbacks, and strict mode were introduced.
+
+The day also introduced **build tools and package managers**, specifically NPM, and how to manually set up a Node.js project using `package.json`.
+
+---
+
+## Project Structure (Day 2)
+
+New files and folders were added to structure backend-related work:
+
+```text
+02._First_Server/
+├── app.js
+├── package.json
+├── package-lock.json
+```
+
+Additional JavaScript practice files were added:
+
+```text
+variables_2.js
+functions.js
+```
+
+---
+
+## Clean Code: Strict Mode (and why it matters)
+
+Strict mode helps catch mistakes that JavaScript otherwise allows.
+
+Example (bad practice): creating variables without declaring them:
+
+```js
+// "use strict";
+
+// missing declaration type
+// NEVER EVER do this
+totalGlobalVariable = "";
+```
+
+This creates an implicit global variable (easy to miss, hard to debug). With strict mode enabled, this would throw an error.
+
+---
+
+## Scoping in JavaScript: `var` vs `let`
+
+### Why `var` is risky
+
+`var` is function-scoped and can “bleed through” blocks, which can cause surprising behavior.
+
+```js
+{ // block scope
+    var someVariable = true;
+    {
+        var someVariable = false;
+    }
+    // someVariable is now false
+}
+```
+
+### Prefer `let` (block scope)
+
+`let` is block-scoped, which makes code easier to reason about:
+
+```js
+{
+    let someVariable = true;
+    {
+        let someVariable = false;
+    }
+    console.log(someVariable); // true
+}
+```
+
+### `var` inside loops + async callbacks
+
+When using `var` in a loop with callbacks (like `setTimeout`), the callback sees the final value of `i`:
+
+```js
+for (var i = 0; i < 5; i++) {
+    setTimeout(() => {
+        console.log(i);
+    }, 1000);
+}
+```
+
+Using `let` fixes this because each iteration gets its own block-scoped `i`:
+
+```js
+for (let i = 0; i < 5; i++) {
+    setTimeout(() => {
+        console.log(i);
+    }, 1000);
+}
+```
+
+**Rule reinforced:** Use `const` if possible, otherwise `let`. Avoid `var`.
+
+
+## Functions in JavaScript
+
+### Hoisting
+
+Function declarations are hoisted, meaning they can be called before they appear in the file:
+
+```js
+console.log(getRandomInt(4, 8));
+
+function getRandomInt (min, max) {
+    return Math.floor(Math.random() * (max + 1 - min) + min);
+}
+```
+
+### Function syntaxes covered
+
+#### 1) Function declaration
+
+```js
+function getRandomInt (min, max) {
+    return Math.floor(Math.random() * (max + 1 - min) + min);
+}
+```
+
+#### 2) Anonymous function expression
+
+```js
+const getRandomIntAnonymousFunction = function (min, max) {
+    return Math.floor(Math.random() * (max + 1 - min) + min);
+};
+```
+
+#### 3) Arrow function
+
+```js
+const getRandomIntArrowFunction = (min, max) => {
+    return Math.floor(Math.random() * (max + 1 - min) + min);
+};
+```
+
+---
+
+## Callback Functions (Functions as First-Class Citizens)
+
+JavaScript allows functions to be passed around like values. We practiced this via a “generic action performer” that takes a name and an action (callback):
+
+```js
+function genericActionPerformer(name, action) {
+    return action(name);
+}
+```
+
+### Example: named callback
+
+```js
+function eatinAction (name) {
+    return `${name} is eating`;
+}
+
+console.log(genericActionPerformer('Valdemar', eatinAction));
+console.log(genericActionPerformer('Kristian', eatinAction));
+```
+
+### Example: anonymous function callback
+
+```js
+const runningAction = function (name) {
+    return `${name} is running`;
+}
+
+console.log(genericActionPerformer('Sidi', runningAction));
+```
+
+### Example: inline arrow callback (one-liner)
+
+```js
+console.log(genericActionPerformer('Kristian', (name) => `${name} is laughing`));
+```
+
+---
+
+## Build Tools & Package Managers: NPM + `package.json`
+
+We created an Express project and installed dependencies with NPM.
+
+### What `package.json` is for
+
+* Describes the project
+* Tracks dependencies and their versions
+* Allows others to install what the project needs using `npm install`
+
+### Why `node_modules` should not be pushed
+
+* It’s generated content
+* It can be recreated from `package.json` + `package-lock.json`
+* It’s huge and will bloat Git history
+
+---
+
+## Creating the First Express Server
+
+### Express setup
+
+An Express server was created from scratch in `app.js`.
+
+Key steps:
+
+1. Import Express
+2. Instantiate the app
+3. Define routes
+4. Start the server on a port
+
+```js
+const express = require('express');
+const app = express();
+```
+
+### Routes created
+
+#### GET /
+
+Returns a welcome message:
+
+```js
+app.get('/', (req, res) => {
+    res.send({ data: "Welcome to the first server!" })
+});
+```
+
+#### GET /snowstorms
+
+Returns a warning message:
+
+```js
+app.get('/snowstorms', (req, res) => {
+    res.send({ data: "Snowstorm is coming!" })
+});
+```
+
+---
+
+## Sending Data with GET Requests
+
+We covered two common ways to send data in GET requests:
+
+### 1) Path variables (route params)
+
+Example route:
+
+```js
+app.get('/cars/:carModel/:year', (req, res) => {
+    console.log(req.params);
+    res.send({ data:`
+        Your ${req.params.carModel} is very nice.
+        Is it from the year ${req.params.year}?
+    `});
+});
+```
+
+* `:carModel` and `:year` are dynamic values
+* These values are available in `req.params`
+
+### 2) Query string parameters
+
+Example route:
+
+```js
+app.get('/bag', (req, res) => {
+    res.send({ data: req.query });
+});
+```
+
+* Data is sent after `?` in the URL
+* Example: `/bag?item=apple&amount=2`
+* These values are available in `req.query`
+
+---
+
+## Running the Server
+
+The server listens on port **8080**:
+
+```js
+app.listen(8080);
+```
+
+To run it locally:
+
+```bash
+node app.js
+```
+
+---
+
+## Movies API – Part I (GET Only)
+
+As part of the ongoing REST API exercises, a simple Movies API was implemented using Express. The focus of this task was to design and implement the R (Read) part of CRUD, while strictly following REST conventions.
+
+The implementation intentionally avoids databases, validation, and fixed schemas, and instead stores data in memory using JavaScript variables.
+
+---
+
+### Implemented Endpoints
+
+#### GET /
+
+Returns a welcome message to verify that the server is running:
+
+```js
+app.get('/', (req, res) => {
+    res.send({ data: "Welcome to the Movie Server! :)" });
+});
+```
+
+---
+
+#### GET /movies
+
+Returns all movies in the collection:
+
+```js
+app.get('/movies', (req, res) => {
+    res.send({ data: movies });
+});
+```
+
+This endpoint returns the full in-memory collection without filtering or validation.
+
+---
+
+#### GET /movies/:id
+
+Returns a single movie based on its unique identifier:
+
+```js
+app.get('/movies/:id', (req, res) => {
+    const id = Number(req.params.id);
+    const movie = movies.find(m => m.id === id);
+    res.send({ data: movie });
+});
+```
+
+* The `id` is passed as a **path parameter**
+* The server controls the identifier
+* No assumptions are made about the structure of the movie object
+
+---
+
+## Reflections (Day 2)
+
+* Scoping rules (`var` vs `let`) explain a lot of "weird" JavaScript behavior.
+* Callbacks are everywhere in Node/Express, so understanding them early is important.
+* `package.json` + dependency management is a core part of working professionally.
+* Express routing makes it simple to return data and handle inputs via params and query strings.
