@@ -200,9 +200,9 @@ The task was to **design**, not implement, a CRUD-based REST API based on the to
 
 | HTTP Method | Endpoint    | Description           |
 | ----------- | ----------- | --------------------- |
-| POST        | /beers      | Create a new beer     |
-| GET         | /beers      | Retrieve all beers    |
-| GET         | /beers/{id} | Retrieve a beer by ID |
+| Get         | /beers      | Retrieve all beers    |
+| GET         | /beers      | Retrieve a beer by id |
+| POST        | /beers      | Create a bew beer     |
 | PUT         | /beers/{id} | Update an entire beer |
 | PATCH       | /beers/{id} | Update part of a beer |
 | DELETE      | /beers/{id} | Delete a beer         |

@@ -47,16 +47,29 @@ app.get('/', (req, res) => {
 // Returns all movies in the collection
 app.get('/movies', (req, res) => {
     console.log(req.params);
+    // do not use res.json | use res.send always
     res.send({ data: movies})
 });
 
 // GET /movies/{id}
 // Returns a single movie based on its unique id
 app.get('/movies/:id', (req, res) => {
-    const id = Number(req.params.id);
-    const movieId = movies.find(m => m.id === id);
+    const providedMovieId = Number(req.params.id);
+    const foundMovie = movies.find((movie) => movie.id === providedMovieId);
     
-    res.send({ data: movieId})
+    if (!foundMovie) {
+        res.status(404).send({ errorMessage: `No movie found by ID: ${req.params.id}`});
+    } else {
+        res.send(foundMovie);
+    }
+});
+
+// Post /movies
+// Adds a new movie to the collection
+app.post('/movies', (req, res) => {
+    movies.push(req.body);
+    console.log(movies);
+    res.send(req.body);
 });
 
 app.listen(8080)
