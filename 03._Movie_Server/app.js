@@ -2,39 +2,30 @@ const express = require('express');
 
 const app = express();
 
+app.use(express.json()); // built-in middleware to parse JSON bodies
+
 // In-memory movie collection.
 // Only `id` is guaranteed and controlled by the server.
 const movies = [
     {
         id: 1,
         title: "The Matrix",
-        year: 1999,
-        genres: ["Sci-Fi", "Action"],
     },
     {
         id: 2,
         title: "Interstellar",
-        year: 2014,
-        genres: ["Sci-Fi", "Drama"],
     },
     {
         id: 3,
         title: "Parasite",
-        year: 2019,
-        genres: ["Thriller", "Drama"],
     },
     {
         id: 4,
         title: "Mad Max: Fury Road",
-        year: 2015,
-        genres: ["Action", "Thriller"],
     },
     {
         id: 5,
         title: "Blade Runner 2049",
-        year: 2017,
-        genres: ["Sci-Fi"],
-
     }
 ];
 
@@ -64,12 +55,95 @@ app.get('/movies/:id', (req, res) => {
     }
 });
 
-// Post /movies
+// POST /movies
 // Adds a new movie to the collection
 app.post('/movies', (req, res) => {
-    movies.push(req.body);
-    console.log(movies);
-    res.send(req.body);
+    const { title } = req.body;
+
+    // Validation 1: Check if the title is a non-empty string
+    if (typeof title !== "string" || title.trim().length === 0) {
+        res.status(400).send({
+            errorMessage: "Invalid body. 'title' must be a non-empty string.",
+        });
+    };
+
+    // Generate a new unique ID for the movie
+    // We can use the current maximum ID in the collection and add 1 to it to ensure uniqueness.
+    const currentMaxId = movies.length === 0 ? 0 : Math.max(...movies.map(movie => movie.id));
+
+    // The next ID will be one greater than the current maximum ID
+    const nextId = currentMaxId + 1;
+
+    // Create a new movie object with the generated ID and the provided title
+    const newMovie = {
+            id: nextId,
+            title: title.trim(),
+        };
+
+        // Add the new movie to the collection
+        movies.push(newMovie);
+        
+        // Respond with the newly created movie and a 201 Created status code
+        res.status(201).send(newMovie);
+});
+
+
+// PUT /movies/{id}
+// Updates an existing movie's information based on its unique id
+app.patch('/movies/:id', (req, res) => {
+    const providedMovieId = Number(req.params.id);
+    
+    // Validation 1: Check if the provided ID is a valid positive integer
+    if (!Number.isInteger(providedMovieId) || providedMovieId <= 0) {
+        res.status(400).send({ errorMessage: `Invalid movie ID: ${req.params.id}. ID must be a positive integer.`});
+    };
+    
+    // Extract the title from the request body
+    const { title } = req.body;
+
+  // Validation 2: Check if the title is a non-empty string
+
+  if (typeof title !== "string" || title.trim().length === 0) {
+    res.status(400).send({
+        errorMessage: "Invalid body. 'title' must be a non-empty string.",
+    });
+  }
+
+  // Find the index of the movie with the provided ID
+  const index = movies.findIndex((movie) => movie.id === providedMovieId);
+
+  // Validation 3: Check if a movie with the provided ID exists
+  if (index === -1) {
+    res.status(404).send({
+      errorMessage: `No movie found by ID: ${req.params.id}`,
+    });
+  }
+
+
+  // Update the movie's title while preserving other properties
+  // The spread operator (...) is used to create a new object that includes all existing properties of the movie, and then the title property is overwritten with the new value from the request body.
+  movies[index] = {
+    ...movies[index],
+    title: title.trim(),
+  };
+  
+  res.send(movies[index]);
+});
+
+// DELETE /movies{id}
+// Deletes a movie from the collection based on its unique id
+app.delete('/movies/:id', (req, res) => {
+    const providedMovieId = Number(req.params.id);
+    const foundMovie = movies.find((movie) => movie.id === providedMovieId);
+
+    if (!foundMovie) {
+        res.status(404).send({ errorMessage: `No movie found by ID: ${req.params.id}`});
+        } else {
+            const indexOfFoundMovie = movies.indexOf(foundMovie);
+            // .splice(startIndex, deleteCount) -> returns an array of the deleted elements
+            movies.splice(indexOfFoundMovie, 1);
+            res.send({ data: `Movie (${foundMovie.title}) with ID: ${req.params.id} has been deleted`});
+    };
 });
 
 app.listen(8080)

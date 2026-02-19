@@ -200,8 +200,8 @@ The task was to **design**, not implement, a CRUD-based REST API based on the to
 
 | HTTP Method | Endpoint    | Description           |
 | ----------- | ----------- | --------------------- |
-| Get         | /beers      | Retrieve all beers    |
-| GET         | /beers      | Retrieve a beer by id |
+| GET         | /beers      | Retrieve all beers    |
+| GET         | /beers{id}  | Retrieve a beer by id |
 | POST        | /beers      | Create a bew beer     |
 | PUT         | /beers/{id} | Update an entire beer |
 | PATCH       | /beers/{id} | Update part of a beer |
@@ -593,3 +593,281 @@ app.get('/movies/:id', (req, res) => {
 * Callbacks are everywhere in Node/Express, so understanding them early is important.
 * `package.json` + dependency management is a core part of working professionally.
 * Express routing makes it simple to return data and handle inputs via params and query strings.
+
+---
+
+## Day 3 - Loop Methods, MOVIES CRUD REST API (Continued), URLs & XSS
+
+**Date:** February 13th
+
+---
+
+## Overview
+Day 3 focused on writing more functional JavaScript, expanding the REST API, understanding how URLs are structured, serving HTML with Express, and learning about XSS (Cross-Site Scripting).
+
+The main shift was moving from basic loops to functional loop methods, and from simple GET routes to a more CRUD-oriented REST structure.
+
+---
+
+## Loop Methods in JavaScript
+
+Instead of using traditional `for` loops, the focus was on using built-in array methods:
+
+* `.map()`
+* `.filter()`
+* `.reduce()`
+* `.find()`
+* `.sort()`
+* `.indexOf()`
+
+### Core Rules
+
+1. Use loop methods whenever possible.
+2. Only use `for` loops for "finger counting" (not for data transformations).
+3. Use `.map()` instead of `.forEach()` if you need the returned data.
+
+### Example: Using `.map()`
+
+```js
+const numbers = [1, 2, 3, 4, 5];
+
+const doubledNumbers = numbers.map(number => number * 2);
+```
+
+`.map()` creates a new array and maps 1:1 from the original array.
+
+---
+
+## CRUDable REST API – Part II
+
+The Movies API has now been fully completed and supports full CRUD functionality.
+
+The following endpoints are implemented:
+
+* GET /movies → Retrieve all movies
+* GET /movies/:id → Retrieve a movie by id
+* POST /movies → Create a new movie (returns 201 Created)
+* PATCH /movies/:id → Update an existing movie
+* DELETE /movies/:id → Delete a movie
+
+### ID Handling (Simulating Relational Databases)
+
+The most important technical challenge in this assignment was handling IDs correctly.
+
+IDs are generated server-side by:
+
+* Finding the current maximum ID in the collection
+* Incrementing it by 1
+
+Finding the current maximum ID in the collection
+
+Incrementing it by 1
+
+```js
+const currentMaxId = movies.length === 0
+    ? 0
+    : Math.max(...movies.map(movie => movie.id));
+
+const nextId = currentMaxId + 1;
+```
+
+This simulates how relational databases such as MySQL implement auto-incrementing primary keys.
+
+Key characteristics:
+
+* IDs are never provided by the client
+* IDs are always unique
+* Deleted IDs are not reused
+* The server controls resource identity
+
+### Edge Case Handling
+
+All edge cases have been tested, including:
+
+* Invalid IDs (non-numeric or negative values)
+* Non-existing resources (404 Not Found)
+* Invalid request bodies (400 Bad Request)
+
+The API now follows REST conventions and properly uses status codes such as:
+
+* 200 OK
+* 201 Created
+* 400 Bad Request
+* 404 Not Found
+
+---
+
+## Anatomy of a URL
+
+We broke down the structure of a URL into its components:
+
+Example:
+
+```
+https://www.google.com/search?hl=en&q=cool%20search
+```
+
+### URL Parts
+
+* Protocol → `https://`
+* Subdomain → `www`
+* Domain → `google`
+* Top-level domain → `.com`
+* Path → `/search`
+* Path variable → `/search/1`
+* Query string → `?hl=en&q=cool%20search`
+
+Understanding URL anatomy is important when designing REST APIs.
+
+---
+
+## Serving HTML with Express
+
+Instead of only sending JSON, we served HTML files using Express.
+
+```js
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/index.html');
+});
+```
+
+This demonstrated how backend and frontend connect.
+
+In `index.html`, a `fetch()` call was used to request data from `/snowstorms` and dynamically update the DOM.
+
+This reinforced:
+
+* Client → Server communication
+* Fetch API usage
+* DOM manipulation
+
+---
+
+## Serving HTML with Express
+
+Instead of only sending JSON, we served HTML files using Express.
+
+```js
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/index.html');
+});
+```
+
+This demonstrated how backend and frontend connect.
+
+In index.html, a fetch() call was used to request data from /snowstorms and dynamically update the DOM.
+
+This reinforced:
+
+* Client → Server communication
+* Fetch API usage
+* DOM manipulation
+
+---
+
+## Status Codes in Express
+
+Status codes were actively used to indicate the result of HTTP requests.
+
+Example (404 – Not Found):
+
+```js
+app.get('/movies/:id', (req, res) => {
+    const providedMovieId = Number(req.params.id);
+    const foundMovie = movies.find(movie => movie.id === providedMovieId);
+
+
+    if (!foundMovie) {
+        return res.status(404).send({
+            errorMessage: `No movie found by ID: ${req.params.id}`
+        });
+    }
+
+
+    res.send(foundMovie);
+});
+```
+
+Status Code Categories
+
+* 2xx → Success (e.g. 200 OK)
+* 3xx → Redirection
+* 4xx → Client errors (e.g. 404 Not Found)
+* 5xx → Server errors
+
+Using proper status codes makes the API more predictable and aligned with REST principles.
+
+---
+
+## Parsing JSON bodies with Express Middleware
+
+To handle POST requests correctly, built-in Express middleware was enabled:
+
+```js
+app.use(express.json());
+```
+
+Why this is necessary
+
+* Parses incoming JSON request bodies
+* Makes the data available on req.body
+* Without it, req.body would be undefined
+
+Example usage:
+
+```js
+app.post('/energydrinks', (req, res) => {
+    energyDrinks.push(req.body);
+    res.send(req.body);
+});
+```
+
+This demonstrates how Express middleware processes requests before they reach route handlers.
+
+---
+
+## Nodemon
+
+Nodemon was introduced as a development tool that automatically restarts the server when files change.
+
+Important:
+
+* It is used only in development.
+* It should not be used in production.
+
+---
+
+## XSS (Cross-Site Scripting)
+
+A basic example of XSS was demonstrated using `innerHTML`.
+
+```js
+containerDiv.innerHTML = `<img src='x' onerror="alert('XSS')">`;
+```
+
+This shows how malicious scripts can be injected into a webpage.
+
+### Prevention Strategy
+
+* Avoid using `innerHTML` when possible
+* Sanitize input by escaping special characters
+
+Example sanitization approach:
+
+```js
+function sanitizeXSS(string) {
+    return string
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;');
+}
+```
+
+---
+
+## Reflections (Day 3)
+
+* Functional loop methods encourage cleaner, more predictable code.
+* REST APIs become clearer when URL anatomy is fully understood.
+* Understanding how the client and server communicate is essential for full-stack development.
+* Security considerations (like XSS) must be understood early, even in small projects.
