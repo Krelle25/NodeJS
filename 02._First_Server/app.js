@@ -40,6 +40,22 @@ app.get('/bag', (req, res) => {
     res.send({ data: req.query });
 });
 
+app.get('/proxy', (req, res) => {
+    /* assignment
+       Create a proxy to https://www.google.com/
+       You have all the knowledge you need to solve this task already
+       */
+
+       fetch("https://www.google.com/")
+       .then((response) => response.text())
+       .then((buffer) => {
+         const decoder = new TextDecoder("ISO-8859-1");
+        const text = decoder.decode(buffer);
+        res.send(text);
+    });
+
+});
+
 app.post('/dinasours', (req, res) => {
     console.log(req.body);
 

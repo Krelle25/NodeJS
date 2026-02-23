@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Age in Time</title>
+</head>
+<body>
+  <h1>Age in Time</h1>
+  <h3>Type in your birthday, and see how much time has passed since then!</h3>
+
+  <div class="card">
+    <label for="birthday">Your birthday</label>
+    <input id="birthday" type="date" />
+
+    <div class="row" style="margin-top:16px;">
+        <div class="big"><strong>Seconds:</strong> <span id="seconds"></span></div>
+        <div class="big"><strong>Minutes:</strong> <span id="minutes"></span></div>
+        <div class="big"><strong>Hours:</strong> <span id="hours"></span></div>
+        <div class="muted" id="note"></div>
+    </div>
+</div>
+
+<style>
+  body { 
+    font-family: 
+    system-ui, Arial; 
+    max-width: 560px;
+    margin: 40px auto; 
+    padding: 0 16px;
+  }
+  
+  .card {
+    border:
+    1px solid #ddd;
+    border-radius: 12px;
+    padding: 16px;
+  }
+
+  label {
+    display: block;
+    margin: 10px 0 6px;
+  }
+
+  input {
+    width: 100%;
+    padding: 4px;
+    font-size: 16px;
+  }
+  .row { 
+    display: grid;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .big {
+    font-size: 18px;
+  }
+  .muted {
+    color: #666;
+    font-size: 14px;
+  }
+</style>
+
+<script>
+  const birthdayInput = document.getElementById("birthday");
+  const secondsEl = document.getElementById("seconds");
+  const minutesEl = document.getElementById("minutes");
+  const hoursEl   = document.getElementById("hours");
+  const noteEl    = document.getElementById("note");
+
+  let timer = null;
+
+  // resets the timer and clears the interval if it exists
+  function stopTimer() {
+    if (timer !== null) clearInterval(timer);
+    timer = null;
+  }   
+  
+  function parseDateAtLocalMidnight(dateStr) {
+    // dateStr is "YYYY-MM-DD"
+    const [y, m, d] = dateStr.split("-").map(Number);
+    // month is 0-based in JS Date()
+    return new Date(y, m - 1, d, 0, 0, 0, 0); // local midnight
+  }
+
+  // Calculates the time difference between the current time and the provided birth date, 
+  // and updates the UI every second to show the elapsed time in seconds, minutes, and hours. 
+  // If the provided birth date is in the future, it displays a message instead.
+  function startTimer(birthDate) {
+    stopTimer();
+    
+    function tick() {
+        const now = new Date();
+        const difference = now - birthDate;
+
+        if (difference < 0) {
+            secondsEl.textContent = minutesEl.textContent = hoursEl.textContent = "—";
+            noteEl.textContent = "That date is in the future 🙂";
+            return;
+        }
+        
+        const totalSeconds = Math.floor(difference / 1000);
+        const totalMinutes = Math.floor(totalSeconds / 60);
+        const totalHours   = Math.floor(totalMinutes / 60);
+
+        secondsEl.textContent = totalSeconds.toLocaleString();
+        minutesEl.textContent = totalMinutes.toLocaleString();
+        hoursEl.textContent   = totalHours.toLocaleString();
+    }
+
+    tick();
+    timer = setInterval(tick, 1000);
+}
+
+  // Listen for changes in the birthday input field. When the user inputs a date, it parses the date and starts the timer to update the elapsed time. 
+  // If the input is cleared, it stops the timer and resets the display.
+  birthdayInput.addEventListener("input", () => {
+    const value = birthdayInput.value; // "YYYY-MM-DD" or ""
+    if (!value) {
+        stopTimer();
+        secondsEl.textContent = minutesEl.textContent = hoursEl.textContent = "—";
+        noteEl.textContent = "";
+        return;
+    }
+
+    const birthDate = parseDateAtLocalMidnight(value);
+    startTimer(birthDate);
+});
+
+</script>
+</body>
+</html>
