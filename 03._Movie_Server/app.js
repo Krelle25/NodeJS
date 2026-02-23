@@ -65,21 +65,6 @@ app.get('/movies/:id', (req, res) => {
 // console.log(++number);
 // console.log(number);
 
-app.post("/movies", (req, res) => {
-    if (!req.body) {
-        return res.status(400).send({ errorMessage: `No JSON body provided. `});
-    }
-
-    const providedMovie = req.body;
-
-    providedMovie.id = nextId++;
-
-    movies.push(providedMovie);
-
-    res.send({ data: providedMovie }); 
-}
-)
-
 // POST /movies
 // Adds a new movie to the collection
 app.post('/movies', (req, res) => {

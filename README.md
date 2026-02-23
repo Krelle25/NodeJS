@@ -598,7 +598,7 @@ app.get('/movies/:id', (req, res) => {
 
 ## Day 3 - Loop Methods, MOVIES CRUD REST API (Continued), URLs & XSS
 
-**Date:** February 13th
+**Date:** February 12th
 
 ---
 
@@ -871,3 +871,228 @@ function sanitizeXSS(string) {
 * REST APIs become clearer when URL anatomy is fully understood.
 * Understanding how the client and server communicate is essential for full-stack development.
 * Security considerations (like XSS) must be understood early, even in small projects.
+
+---
+
+## Day 4 - HTML, Time, Fetch & Deployment
+
+**Date:** February 19th
+
+---
+
+## Overview
+Day 4 focused on these areas:
+
+* Completing the CRUDable REST API (Part II)
+* Working with time in JavaScript (``Date``)
+* Connecting frontend and backend
+* Preparing and deploying a Node/Express application
+
+The goal was to understand how a backend can serve both JSON data and HTML, and how time can be handled correctly in JavaScript.
+
+---
+
+## Working with Time in JavaScript
+
+JavaScript provides the built-in ``Date`` object for handling time.
+
+### Different ways to get time:
+
+```js
+new Date();     // Current date + time (UTC internally)
+Date();         // Local time as string
+Date.now();     // Unix Epoch time (milliseconds since Jan 1, 1970)
+```
+
+Understanding Unix Epoch time is important because:
+
+* It is how time is stored and calculated internally
+* It allows easy subtraction between two dates
+* It is the foundation of most time calculations
+
+---
+
+### Creating Routes with Date
+
+The task was to create routes that return the current month and day.
+
+#### Month - Version 1 (Manual Array)
+
+```js
+const months = ["January", "February", "March", "April",
+                "May", "June", "July", "August", 
+                "September", "October", "November", "December"
+];
+
+app.get('/months/v1', (req, res) => {
+    const currentMonth = new Date().getMonth();
+    res.send({ data: months[currentMonth] });
+});
+```
+
+Here:
+* ``getMonth()`` returns a number (0-11)
+* We map that number to a readable string 
+
+#### Month - Version 2 (Locale-Based)
+```js
+app.get('/months/v2', (req, res) => {
+    const currentMonth = new Date().toLocaleString('en-uk', { month: 'long' });
+    res.send({ data: currentMonth });
+});
+```
+
+This version:
+
+* Uses built-in localization
+* Avoids manual arrays
+* Is cleaner and more scalable
+
+---
+
+### Day Routes
+
+#### Day - Version 1 (Manual Array)
+
+```js
+const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 
+            'Thursday', 'Friday', 'Saturday',];
+
+app.get('/days/v1', (req, res) => {
+    res.send({ data: days[new Date().getDay()] });
+});
+```
+
+#### Day - Version 2 (Locale-Based)
+
+```js
+app.get('/days/v2', (req, res) => {
+    const weekday = new Date().toLocaleString('en-uk', { weekday: 'long' });
+    res.send({ data: weekday });
+});
+```
+
+Again, the second version is preferred because it uses built-in localization instead of manual mapping.
+
+---
+
+## Falsy Values in JavaScript
+
+The following values are considered falsy:
+
+* ``false``
+* ``null``
+* ``undefined``
+* ``NaN``
+* ``""`` (empty strings)
+
+Understanding falsy values is important when validating input or checking conditions.
+
+---
+
+## Assignment: Time To Deploy!
+
+https://github.com/anderslatif/EK_DAT_Node.js_2026_Spring/blob/main/00._Course_Material/01._Assignments/04._Time/Time_To_Deploy.md
+
+## My Solution: Age in Time
+
+I implemented the assignment as “Age in Time” — a small webpage where the user inputs their birthday and the UI continuously shows how much time has passed since then.
+
+### Features
+
+* User selects a birthday (<input type="date">)
+* Calculates elapsed time as:
+    * seconds
+    * minutes
+    * hours
+* Updates automatically every second
+* Handles invalid input (e.g., a future date)
+
+### Core time calculation
+
+Time is calculated by subtracting two Date objects (difference in milliseconds), then converting:
+
+```js
+const difference = now - birthDate;
+
+const totalSeconds = Math.floor(difference / 1000);
+const totalMinutes = Math.floor(totalSeconds / 60);
+const totalHours   = Math.floor(totalMinutes / 60);
+```
+
+### Live updates (internal handling)
+
+To avoid stacking intervals, the timer is cleared before starting a new one:
+
+```js
+function stopTimer() {
+  if (timer !== null) clearInterval(timer);
+  timer = null;
+}
+```
+
+---
+
+## Deployment – Hosted on Vercel
+
+The application was deployed using **Vercel**.
+
+Vercel uses a **serverless architecture**, meaning:
+
+* The server is only started when a route is requested
+* The server shuts down automatically when idle
+* In-memory variables are not persistent between invocations
+
+This means that any data stored directly in server variables will be lost once the server instance shuts down. For persistent storage, an external database would be required (not part of this assignment).
+
+---
+
+### Configuration
+
+To deploy the Express application correctly, a `vercel.json` file was added to the project.
+
+The configuration ensures:
+
+* `app.js` is used as the entry point
+* All routes are forwarded to the Express app
+* The Node runtime is correctly used
+
+Example configuration:
+
+```json
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "app.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "app.js"
+    }
+  ]
+}
+```
+
+## Reflections (Day 4)
+
+Working with time in JavaScript is trickier than expected due to:
+
+* Time zones
+* Milliseconds precision
+* Local vs UTC differences
+
+However, understanding Unix Epoch time makes everything predictable.
+
+Serving HTML through Express helped bridge the gap between:
+
+* Backend APIs
+* Frontend user interfaces
+* Real-world full-stack development
+
+Deployment marked the transition from “local project” to “real application”.
+
+--- 
