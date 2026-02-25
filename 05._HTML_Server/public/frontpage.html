@@ -93,6 +93,9 @@
             noteEl.textContent = "That date is in the future 🙂";
             return;
         }
+
+        // cleaar the note if the date is valid and in the past
+        noteEl.textContent = "";
         
         const totalSeconds = Math.floor(difference / 1000);
         const totalMinutes = Math.floor(totalSeconds / 60);
