@@ -81,9 +81,6 @@
     return new Date(y, m - 1, d, 0, 0, 0, 0); // local midnight
   }
 
-  // Calculates the time difference between the current time and the provided birth date, 
-  // and updates the UI every second to show the elapsed time in seconds, minutes, and hours. 
-  // If the provided birth date is in the future, it displays a message instead.
   function startTimer(birthDate) {
     stopTimer();
     
