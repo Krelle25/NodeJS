@@ -5,7 +5,7 @@ const app = express();
 app.use(express.static("public"));
 
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/public/frontpage.html');
+    res.sendFile(__dirname + '/public/frontpage/frontpage.html');
 });
 
 app.listen(8080, () => {

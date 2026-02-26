@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Age in Time</title>
+  <link rel="stylesheet" href="frontpage/frontpage.css">
 </head>
 <body>
   <h1>Age in Time</h1>
@@ -60,6 +61,7 @@
     font-size: 14px;
   }
 </style>
+<script src="frontpage/frontpage.js"></script>
 
 <script>
   const birthdayInput = document.getElementById("birthday");
@@ -94,7 +96,7 @@
             return;
         }
 
-        // cleaar the note if the date is valid and in the past
+        // clear the note if the date is valid and in the past
         noteEl.textContent = "";
         
         const totalSeconds = Math.floor(difference / 1000);
